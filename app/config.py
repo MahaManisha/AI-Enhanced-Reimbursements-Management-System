@@ -50,6 +50,7 @@ class Config:
     LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_TIMEOUT_SECONDS = int(os.getenv("GEMINI_TIMEOUT_SECONDS", 15))
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
     OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")

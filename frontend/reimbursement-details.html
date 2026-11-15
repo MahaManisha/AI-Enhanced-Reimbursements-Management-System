@@ -261,10 +261,15 @@
                 `;
 
                 // AI Box
+                const formatAiField = (val, fallback) => {
+                    if (!val) return fallback;
+                    if (Array.isArray(val)) return val.length > 0 ? "• " + val.join("\n• ") : fallback;
+                    return String(val);
+                };
                 document.getElementById("ai-summary").textContent = c.ai_summary || "AI Summary not generated.";
-                document.getElementById("ai-obs").textContent = c.ai_observations || "No observations noted.";
-                document.getElementById("ai-missing").textContent = c.ai_missing_info || "None.";
-                document.getElementById("ai-actions").textContent = c.ai_suggested_actions || "Inspect per company guidelines.";
+                document.getElementById("ai-obs").textContent = formatAiField(c.ai_observations_list || c.ai_observations || c.genai_observations, "No observations noted.");
+                document.getElementById("ai-missing").textContent = formatAiField(c.ai_missing_info_list || c.ai_missing_info || c.missing_documents, "None.");
+                document.getElementById("ai-actions").textContent = formatAiField(c.ai_suggested_actions_list || c.ai_suggested_actions || c.suggested_actions, "Inspect per company guidelines.");
 
                 // Reviewer comments
                 const noticeBox = document.getElementById("reviewer-notice-box");

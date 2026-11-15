@@ -43,9 +43,13 @@ def _compute_ml_and_ai(claim: dict) -> tuple[dict, dict, str]:
     ReimbursementModel.update_ai_insights(
         reimbursement_id=claim["id"],
         summary=insights.get("summary", ""),
-        observations=insights.get("observations", ""),
-        missing_info=insights.get("missing_info", ""),
-        suggested_actions=insights.get("suggested_actions", "")
+        observations=insights.get("observations_text") or insights.get("observations", ""),
+        missing_info=insights.get("missing_info_text") or insights.get("missing_info", ""),
+        suggested_actions=insights.get("suggested_actions_text") or insights.get("suggested_actions", ""),
+        observations_list=insights.get("observations_list") or (insights.get("observations") if isinstance(insights.get("observations"), list) else None),
+        missing_info_list=insights.get("missing_info_list") or (insights.get("missing_info") if isinstance(insights.get("missing_info"), list) else None),
+        suggested_actions_list=insights.get("suggested_actions_list") or (insights.get("suggested_actions") if isinstance(insights.get("suggested_actions"), list) else None),
+        ai_provider=insights.get("ai_source") or insights.get("ai_provider") or provider_info
     )
     return pred_result, insights, provider_info
 

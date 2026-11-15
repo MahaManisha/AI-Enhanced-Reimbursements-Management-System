@@ -280,24 +280,51 @@ class ReimbursementModel:
 
     @staticmethod
     def update_ai_insights(reimbursement_id: Any, summary: str,
-                           observations: str, missing_info: str,
-                           suggested_actions: str) -> None:
-        """Saves Generative AI audit observations and recommendations."""
+                           observations: Any, missing_info: Any,
+                           suggested_actions: Any,
+                           observations_list: Optional[List[str]] = None,
+                           missing_info_list: Optional[List[str]] = None,
+                           suggested_actions_list: Optional[List[str]] = None,
+                           ai_provider: str = "FALLBACK",
+                           ai_timestamp: Optional[datetime] = None) -> None:
+        """Saves Generative AI audit observations, recommendations, and execution metadata."""
         db = get_db()
         oid = to_object_id(reimbursement_id)
-        now = datetime.now(timezone.utc)
+        now = ai_timestamp or datetime.now(timezone.utc)
+
+        # Standardize strings and lists for dual storage
+        obs_str = "\n• ".join(observations) if isinstance(observations, list) else str(observations or "")
+        missing_str = "\n• ".join(missing_info) if isinstance(missing_info, list) else str(missing_info or "")
+        actions_str = "\n• ".join(suggested_actions) if isinstance(suggested_actions, list) else str(suggested_actions or "")
+
+        obs_items = observations_list if observations_list is not None else (
+            observations if isinstance(observations, list) else ([obs_str] if obs_str else [])
+        )
+        missing_items = missing_info_list if missing_info_list is not None else (
+            missing_info if isinstance(missing_info, list) else ([missing_str] if missing_str else [])
+        )
+        action_items = suggested_actions_list if suggested_actions_list is not None else (
+            suggested_actions if isinstance(suggested_actions, list) else ([actions_str] if actions_str else [])
+        )
 
         db.reimbursement_requests.update_one(
             {"$or": [{"_id": oid}, {"id": reimbursement_id}]},
             {
                 "$set": {
                     "ai_summary": summary,
-                    "genai_observations": observations,
-                    "ai_observations": observations,
-                    "missing_documents": missing_info,
-                    "ai_missing_info": missing_info,
-                    "suggested_actions": suggested_actions,
-                    "ai_suggested_actions": suggested_actions,
+                    "genai_observations": obs_str,
+                    "ai_observations": obs_str,
+                    "ai_observations_list": obs_items,
+                    "missing_documents": missing_str,
+                    "ai_missing_info": missing_str,
+                    "ai_missing_info_list": missing_items,
+                    "suggested_actions": actions_str,
+                    "ai_suggested_actions": actions_str,
+                    "ai_suggested_actions_list": action_items,
+                    "ai_provider": ai_provider,
+                    "ai_source": ai_provider,
+                    "ai_timestamp": now,
+                    "analysis_timestamp": now,
                     "updated_at": now
                 }
             }

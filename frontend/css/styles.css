@@ -623,6 +623,7 @@ textarea.form-control {
     font-size: 14px;
     color: var(--slate-700);
     line-height: 1.6;
+    white-space: pre-line;
 }
 
 .ai-disclaimer {

@@ -551,10 +551,15 @@ window.openReviewModal = async function(claimId) {
         `;
 
         // Generative AI insights
+        const formatAiField = (val, fallback) => {
+            if (!val) return fallback;
+            if (Array.isArray(val)) return val.length > 0 ? "• " + val.join("\n• ") : fallback;
+            return String(val);
+        };
         document.getElementById("rev-ai-summary").textContent = c.ai_summary || c.summary || "AI Summary not generated.";
-        document.getElementById("rev-ai-obs").textContent = c.ai_observations || c.genai_observations || "No observations noted.";
-        document.getElementById("rev-ai-missing").textContent = c.ai_missing_info || c.missing_documents || "None.";
-        document.getElementById("rev-ai-actions").textContent = c.ai_suggested_actions || c.suggested_actions || "Inspect per company guidelines.";
+        document.getElementById("rev-ai-obs").textContent = formatAiField(c.ai_observations_list || c.ai_observations || c.genai_observations, "No observations noted.");
+        document.getElementById("rev-ai-missing").textContent = formatAiField(c.ai_missing_info_list || c.ai_missing_info || c.missing_documents, "None.");
+        document.getElementById("rev-ai-actions").textContent = formatAiField(c.ai_suggested_actions_list || c.ai_suggested_actions || c.suggested_actions, "Inspect per company guidelines.");
 
         // Action Buttons state
         const actionsContainer = document.getElementById("review-actions-buttons");
