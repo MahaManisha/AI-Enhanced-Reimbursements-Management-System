@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - AI-Enhanced Reimbursements System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--slate-50);
+            padding: 24px 16px;
+            margin: 0;
+        }
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-md);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 28px;
+            box-sizing: border-box;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--slate-900);
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+        .auth-header p {
+            font-size: 14px;
+            color: var(--slate-500);
+            margin-top: 6px;
+            margin-bottom: 0;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--slate-700);
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Join the corporate expense reimbursement portal</p>
+        </div>
+
+        <div id="register-alert" class="alert alert-danger" style="display: none; margin-bottom: 16px;"></div>
+
+        <form id="register-form" novalidate>
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" class="form-control" placeholder="e.g. John Doe" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Work Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="john.doe@company.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" class="form-control" required>
+                    <option value="">Select your department...</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales & BD">Sales & BD</option>
+                    <option value="Human Resources">Human Resources</option>
+                    <option value="Product & Design">Product & Design</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Customer Support">Customer Support</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password (Minimum 6 characters)</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="6" required>
+            </div>
+
+            <button type="submit" id="btn-register" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                Create Account
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--slate-500);">
+            Already have an account? <a href="/login.html" style="font-weight: 600;">Sign In</a>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.getElementById("register-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const alertEl = document.getElementById("register-alert");
+            const submitBtn = document.getElementById("btn-register");
+
+            const full_name = document.getElementById("full_name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const department = document.getElementById("department").value;
+            const password = document.getElementById("password").value;
+
+            alertEl.style.display = "none";
+
+            if (!full_name || full_name.length < 2) {
+                alertEl.textContent = "Please enter your full name (at least 2 characters).";
+                alertEl.style.display = "block";
+                return;
+            }
+
+            if (!email) {
+                alertEl.textContent = "A valid work email is required.";
+                alertEl.style.display = "block";
+                return;
+            }
+
+            if (!department) {
+                alertEl.textContent = "Please select your department.";
+                alertEl.style.display = "block";
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                alertEl.textContent = "Password must be at least 6 characters long.";
+                alertEl.style.display = "block";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Creating Account...";
+
+            try {
+                await Auth.register({
+                    full_name,
+                    email,
+                    department,
+                    password,
+                    role: "EMPLOYEE"
+                });
+                window.location.href = "/employee-dashboard.html";
+            } catch (err) {
+                alertEl.textContent = err.message || "Registration failed. Please try again.";
+                alertEl.style.display = "block";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Create Account";
+            }
+        });
+    </script>
+</body>
+</html>

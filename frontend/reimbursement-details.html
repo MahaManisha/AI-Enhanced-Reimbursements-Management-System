@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Details - AI Reimbursements</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-text">
+                    <h2>Reimbursify AI</h2>
+                    <span id="sidebar-role-tag">Portal</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a id="nav-dashboard-link" href="/employee-dashboard.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span>Back to Dashboard</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-badge">
+                    <div class="user-avatar">--</div>
+                    <div class="user-info">
+                        <div class="user-name">Loading...</div>
+                        <div class="user-role">User</div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-sm btn-secondary" title="Sign Out">Sign Out</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" style="max-width: 960px;">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Claim Details <span id="header-claim-id" style="color: var(--primary);">#</span></h1>
+                    <p>Comprehensive expense dossier, Random Forest risk scoring, and Generative AI audit observations.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="window.history.back()">&larr; Back</button>
+                </div>
+            </header>
+
+            <div id="loading-spinner" style="text-align: center; padding: 60px;">
+                <div>Loading claim record...</div>
+            </div>
+
+            <div id="claim-content" style="display: none;">
+                <!-- Header Stats Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Expense Summary</div>
+                        <div id="claim-status-badge"></div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: var(--slate-400); font-weight: 600;">Employee Name</div>
+                                <div id="claim-employee" style="font-weight: 700; color: var(--slate-900);">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: var(--slate-400); font-weight: 600;">Department</div>
+                                <div id="claim-dept" style="font-weight: 600; color: var(--slate-800);">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: var(--slate-400); font-weight: 600;">Expense Category</div>
+                                <div id="claim-category" style="font-weight: 700; color: var(--slate-900);">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: var(--slate-400); font-weight: 600;">Claimed Amount</div>
+                                <div id="claim-amount" style="font-weight: 800; color: var(--primary); font-size: 18px;">$0.00</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: var(--slate-400); font-weight: 600;">Date Incurred</div>
+                                <div id="claim-date" style="font-weight: 600; color: var(--slate-800);">-</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--slate-500); margin-bottom: 6px;">Description & Justification</div>
+                            <div id="claim-desc" style="background: var(--slate-50); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--slate-200); font-size: 14px;"></div>
+                        </div>
+
+                        <!-- Bill Attachment Section -->
+                        <div style="margin-top: 20px;">
+                            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--slate-500); margin-bottom: 6px;">Receipt Document</div>
+                            <div id="claim-receipt-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Machine Learning Risk Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Machine Learning Risk Assessment (Random Forest)</div>
+                        <span class="badge badge-risk-low" id="ml-badge-indicator">Model Active</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="ml-details-box"></div>
+                    </div>
+                </div>
+
+                <!-- Generative AI Insights Card -->
+                <div class="ai-card">
+                    <div class="ai-card-header">
+                        <div class="ai-card-title">
+                            <span>Generative AI Financial Audit Observations</span>
+                        </div>
+                        <span class="badge" style="background: #fed7aa; color: #9a3412;">Advisory Audit Copilot</span>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="ai-section-title">Claim Summary</div>
+                        <div id="ai-summary" class="ai-section-content">-</div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="ai-section-title">Expense Observations</div>
+                        <div id="ai-obs" class="ai-section-content">-</div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="ai-section-title">Missing Documentation Check</div>
+                        <div id="ai-missing" class="ai-section-content">-</div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="ai-section-title">Recommended Review Actions</div>
+                        <div id="ai-actions" class="ai-section-content">-</div>
+                    </div>
+
+                    <div class="ai-disclaimer">
+                        Advisory Notice: Generative AI insights and statistical risk predictions provide decision assistance for finance teams. All authorizations and disbursements are subject to human review by finance officers.
+                    </div>
+                </div>
+
+                <!-- Rejection or Reviewer comments if present -->
+                <div id="reviewer-notice-box" style="display: none;"></div>
+
+                <!-- Audit History -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Audit Log & State Transitions</div>
+                    </div>
+                    <div class="card-body">
+                        <div id="audit-trail-container" class="timeline"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/reimbursements.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!Auth.requireAuth()) return;
+            document.getElementById("logout-btn")?.addEventListener("click", () => Auth.logout());
+
+            const user = Auth.getCurrentUser();
+            if (user && user.role === "ADMIN") {
+                document.getElementById("nav-dashboard-link").href = "/finance-dashboard.html";
+                document.getElementById("sidebar-role-tag").textContent = "Finance Admin";
+            } else {
+                document.getElementById("nav-dashboard-link").href = "/employee-dashboard.html";
+                document.getElementById("sidebar-role-tag").textContent = "Employee";
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const claimId = urlParams.get("id");
+            if (!claimId) {
+                alert("No claim ID specified in query string.");
+                window.history.back();
+                return;
+            }
+
+            await loadClaimData(claimId);
+        });
+
+        async function loadClaimData(claimId) {
+            try {
+                const res = await API.get(`/reimbursements/${claimId}`);
+                if (!res.success) throw new Error(res.error);
+
+                const c = res.claim;
+                document.getElementById("header-claim-id").textContent = `#${c.id}`;
+                document.getElementById("claim-employee").textContent = c.employee_name;
+                document.getElementById("claim-dept").textContent = c.employee_department;
+                document.getElementById("claim-category").textContent = c.category_name;
+                document.getElementById("claim-amount").textContent = ReimbursementUI.formatCurrency(c.amount);
+                document.getElementById("claim-date").textContent = ReimbursementUI.formatDate(c.expense_date);
+                document.getElementById("claim-status-badge").innerHTML = ReimbursementUI.getStatusBadge(c.claim_status);
+                document.getElementById("claim-desc").textContent = c.description;
+
+                // Receipt section
+                const receiptBox = document.getElementById("claim-receipt-container");
+                if (c.bill_available) {
+                    receiptBox.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;padding:12px 16px;border-radius:8px;border:1px solid #e2e8f0;">
+                            <div><strong>${c.bill_original_name || c.receipt_filename || "Attached Bill"}</strong></div>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="viewReceipt('${c.id}')">View / Download Bill</button>
+                        </div>
+                    `;
+                } else {
+                    receiptBox.innerHTML = `
+                        <div style="background:#fffbeb;padding:12px 16px;border-radius:8px;border:1px solid #fde68a;color:#b45309;font-size:13px;">
+                            No supporting bill attached.
+                        </div>
+                    `;
+                }
+
+                // ML Box
+                const confPct = c.ml_confidence ? (c.ml_confidence * 100).toFixed(1) : "0";
+                let probHtml = "";
+                let probs = c.ml_probabilities;
+                if (typeof probs === "string") {
+                    try { probs = JSON.parse(probs); } catch(e) {}
+                }
+                if (probs && typeof probs === "object") {
+                    probHtml = `
+                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                            <div style="font-size: 12px; font-weight: 700; color: var(--slate-700); margin-bottom: 8px;">Random Forest Class Probability Distribution:</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+                                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 11px; font-weight: 600; color: #166534;">Likely Approved</div>
+                                    <div style="font-size: 15px; font-weight: 700; color: #15803d;">${((probs.LIKELY_APPROVED || 0) * 100).toFixed(1)}%</div>
+                                </div>
+                                <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 8px 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 11px; font-weight: 600; color: #92400e;">Requires Review</div>
+                                    <div style="font-size: 15px; font-weight: 700; color: #b45309;">${((probs.REQUIRES_REVIEW || 0) * 100).toFixed(1)}%</div>
+                                </div>
+                                <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 8px 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 11px; font-weight: 600; color: #991b1b;">High Rejection Risk</div>
+                                    <div style="font-size: 15px; font-weight: 700; color: #b91c1c;">${((probs.HIGH_REJECTION_RISK || 0) * 100).toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById("ml-details-box").innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <div>
+                            <strong>Predicted Risk Class:</strong> ${ReimbursementUI.getRiskBadge(c.ml_prediction, c.ml_confidence)}
+                        </div>
+                        <div style="font-size:13px;color:var(--slate-500);">Confidence: <strong>${confPct}%</strong></div>
+                    </div>
+                    <div class="ml-meter">
+                        <div class="ml-meter-fill" style="width:${confPct}%; background:${c.ml_prediction === 'LIKELY_APPROVED' ? '#16a34a' : c.ml_prediction === 'REQUIRES_REVIEW' ? '#d97706' : '#dc2626'};"></div>
+                    </div>
+                    ${probHtml}
+                `;
+
+                // AI Box
+                document.getElementById("ai-summary").textContent = c.ai_summary || "AI Summary not generated.";
+                document.getElementById("ai-obs").textContent = c.ai_observations || "No observations noted.";
+                document.getElementById("ai-missing").textContent = c.ai_missing_info || "None.";
+                document.getElementById("ai-actions").textContent = c.ai_suggested_actions || "Inspect per company guidelines.";
+
+                // Reviewer comments
+                const noticeBox = document.getElementById("reviewer-notice-box");
+                if (c.claim_status === "REJECTED" && c.rejection_reason) {
+                    noticeBox.style.display = "block";
+                    noticeBox.innerHTML = `
+                        <div class="alert alert-danger" style="margin-bottom: 24px;">
+                            <strong>Finance Rejection Reason:</strong> ${c.rejection_reason}
+                        </div>
+                    `;
+                } else if (c.claim_status === "APPROVED" && c.reviewer_comments) {
+                    noticeBox.style.display = "block";
+                    noticeBox.innerHTML = `
+                        <div class="alert alert-success" style="margin-bottom: 24px;">
+                            <strong>Finance Approval Note:</strong> ${c.reviewer_comments}
+                        </div>
+                    `;
+                } else {
+                    noticeBox.style.display = "none";
+                }
+
+                // Audit Trail
+                ReimbursementUI.renderAuditTrail(res.audit_logs, document.getElementById("audit-trail-container"));
+
+                document.getElementById("loading-spinner").style.display = "none";
+                document.getElementById("claim-content").style.display = "block";
+            } catch (err) {
+                alert("Error loading claim details: " + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
+

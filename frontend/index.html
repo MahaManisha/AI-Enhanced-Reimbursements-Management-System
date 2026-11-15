@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enhanced Reimbursements Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 80px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+        }
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+        .hero h1 span {
+            color: #f97316;
+        }
+        .hero p {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 720px;
+            margin: 0 auto 32px auto;
+            line-height: 1.6;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+        .pill-badge {
+            display: inline-block;
+            background: rgba(234, 88, 12, 0.15);
+            color: #ea580c;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .demo-roles {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            margin-top: 60px;
+            box-shadow: var(--shadow-sm);
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        /* Minimal Corporate Workflow Styles */
+        .workflow-section {
+            margin-top: 0;
+        }
+        .workflow-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 36px auto;
+        }
+        .workflow-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--slate-900);
+            letter-spacing: -0.3px;
+        }
+        .workflow-header p {
+            color: var(--slate-500);
+            font-size: 15px;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            align-items: stretch;
+            position: relative;
+        }
+        .step-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-md);
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.15s ease;
+        }
+        .step-card:hover {
+            border-color: var(--slate-300);
+        }
+        .step-num {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .step-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--slate-900);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+        .step-desc {
+            font-size: 13px;
+            color: var(--slate-600);
+            line-height: 1.55;
+            margin: 0;
+        }
+        .step-predictions {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-top: 6px;
+        }
+        .pred-item {
+            font-size: 12px;
+            color: var(--slate-600);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pred-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .pred-approved { background-color: var(--success); }
+        .pred-review { background-color: var(--warning); }
+        .pred-rejected { background-color: var(--danger); }
+
+        /* Thin subtle connecting lines between steps */
+        @media (min-width: 1024px) {
+            .step-card:not(:last-child)::after {
+                content: "";
+                position: absolute;
+                top: 31px;
+                right: -16px;
+                width: 16px;
+                height: 1px;
+                background-color: var(--slate-200);
+            }
+        }
+        @media (max-width: 1023px) and (min-width: 768px) {
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 30px; }
+            .demo-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 767px) {
+            .workflow-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .step-card:not(:last-child)::after {
+                content: "";
+                position: absolute;
+                bottom: -16px;
+                left: 24px;
+                width: 1px;
+                height: 16px;
+                background-color: var(--slate-200);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <span class="pill-badge">Production-Grade College Project Demonstration</span>
+        <h1>AI-Enhanced <span>Reimbursements</span> Management System</h1>
+        <p>
+            An end-to-end enterprise reimbursement platform combining a Random Forest Classifier for approval risk prediction, Generative AI for automated audit summaries, role-based workflows, and secure receipt verification.
+        </p>
+        <div class="hero-buttons">
+            <a href="/login.html" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px;">Launch Portal / Sign In &rarr;</a>
+            <a href="/register.html" class="btn btn-secondary" style="padding: 12px 28px; font-size: 15px;">Register Employee Account</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- How Our System Works Section -->
+        <section class="workflow-section">
+            <div class="workflow-header">
+                <h2>How Our System Works</h2>
+                <p>A streamlined five-step process from claim submission to automated risk analysis and financial review.</p>
+            </div>
+
+            <div class="workflow-grid">
+                <!-- Step 01 -->
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <h3 class="step-title">Submit Reimbursement Claim</h3>
+                    <p class="step-desc">Employees log in, enter expense details, select a category, and upload supporting bills or receipts.</p>
+                </div>
+
+                <!-- Step 02 -->
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <h3 class="step-title">Machine Learning Prediction</h3>
+                    <p class="step-desc">The Random Forest model analyzes the expense amount, category, bill availability, and historical employee reimbursement patterns to predict:</p>
+                    <div class="step-predictions">
+                        <span class="pred-item"><span class="pred-dot pred-approved"></span>Likely Approved</span>
+                        <span class="pred-item"><span class="pred-dot pred-review"></span>Requires Review</span>
+                        <span class="pred-item"><span class="pred-dot pred-rejected"></span>High Rejection Risk</span>
+                    </div>
+                </div>
+
+                <!-- Step 03 -->
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <h3 class="step-title">Generative AI Audit</h3>
+                    <p class="step-desc">The LLM generates reimbursement summaries, expense observations, missing-documentation alerts, and review suggestions.</p>
+                </div>
+
+                <!-- Step 04 -->
+                <div class="step-card">
+                    <div class="step-num">04</div>
+                    <h3 class="step-title">Finance Team Review</h3>
+                    <p class="step-desc">The finance administrator reviews the submitted claim, supporting bills, ML prediction, and AI-generated observations before approving or rejecting it.</p>
+                </div>
+
+                <!-- Step 05 -->
+                <div class="step-card">
+                    <div class="step-num">05</div>
+                    <h3 class="step-title">Track Reimbursement Status</h3>
+                    <p class="step-desc">Employees can monitor their claim status, view decision comments, and access their reimbursement history through the employee dashboard.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Accounts Box -->
+        <div class="demo-roles">
+            <h3 style="font-size: 22px; font-weight: 800; color: var(--slate-900); text-align: center;">Ready-To-Demonstrate Accounts</h3>
+            <p style="color: var(--slate-500); text-align: center; margin-top: 6px;">Pre-seeded in MongoDB Atlas with baseline accounts across administrative and employee roles.</p>
+
+            <div class="demo-grid">
+                <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 20px;">
+                    <span class="badge badge-approved" style="margin-bottom: 8px;">Role: Finance Administrator</span>
+                    <h4 style="font-size: 16px; font-weight: 700; color: var(--slate-900);">Finance Team Portal</h4>
+                    <p style="font-size: 13px; color: var(--slate-600); margin: 6px 0 12px 0;">
+                        Full review capabilities: approve/reject requests with mandatory rejection reasoning, inspect AI & ML risk scores, filter claims, and manage categories.
+                    </p>
+                    <div style="background: var(--white); padding: 10px 14px; border-radius: 6px; font-size: 13px; font-family: monospace; border: 1px solid var(--slate-200);">
+                        Email: <strong>admin@company.com</strong><br>
+                        Password: <strong>Password@123</strong>
+                    </div>
+                </div>
+
+                <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 20px;">
+                    <span class="badge badge-pending" style="margin-bottom: 8px;">Role: Employee</span>
+                    <h4 style="font-size: 16px; font-weight: 700; color: var(--slate-900);">Employee Self-Service Portal</h4>
+                    <p style="font-size: 13px; color: var(--slate-600); margin: 6px 0 12px 0;">
+                        Submit claims with drag-and-drop receipts, view personal expense trends, see instant ML risk predictions, and inspect AI summaries.
+                    </p>
+                    <div style="background: var(--white); padding: 10px 14px; border-radius: 6px; font-size: 13px; font-family: monospace; border: 1px solid var(--slate-200);">
+                        Email: <strong>john.doe@company.com</strong><br>
+                        Password: <strong>Password@123</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 28px;">
+                <a href="/login.html" class="btn btn-primary" style="padding: 12px 32px;">Go To Sign In &rarr;</a>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 30px; border-top: 1px solid var(--slate-200); color: var(--slate-400); font-size: 13px;">
+        AI-Enhanced Reimbursements Management System &bull; College Project Evaluation Edition &bull; Python Flask & MongoDB Atlas & scikit-learn
+    </footer>
+
+</body>
+</html>
+

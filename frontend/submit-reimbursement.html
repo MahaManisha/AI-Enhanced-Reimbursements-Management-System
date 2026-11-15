@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Claim - AI Reimbursements</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-text">
+                    <h2>Reimbursify AI</h2>
+                    <span>Employee Portal</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/employee-dashboard.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span>My Dashboard</span>
+                </a>
+                <a href="/submit-reimbursement.html" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span>Submit New Claim</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-badge">
+                    <div class="user-avatar">--</div>
+                    <div class="user-info">
+                        <div class="user-name">Loading...</div>
+                        <div class="user-role">Employee</div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-sm btn-secondary" title="Sign Out">Sign Out</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" style="max-width: 800px;">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Submit Expense Reimbursement</h1>
+                    <p>Enter expense details and attach receipts. The Random Forest model evaluates approval risk and Generative AI provides advisory compliance observations.</p>
+                </div>
+                <div class="page-actions">
+                    <a href="/employee-dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </header>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Expense Details Form</div>
+                </div>
+                <div class="card-body">
+                    <div id="submit-alert" class="alert alert-danger" style="display: none; margin-bottom: 16px;"></div>
+                    <div id="submit-success" class="alert alert-success" style="display: none; margin-bottom: 16px;"></div>
+
+                    <form id="standalone-submit-form" novalidate>
+                        <div class="form-group">
+                            <label for="claim-category">Expense Category *</label>
+                            <select id="claim-category" class="form-control" required>
+                                <option value="">Select Expense Category...</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label for="claim-amount">Claimed Amount ($) *</label>
+                                <input type="number" step="0.01" min="0.01" max="1000000" id="claim-amount" class="form-control" placeholder="0.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="claim-date">Expense Date *</label>
+                                <input type="date" id="claim-date" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="claim-desc">Expense Description & Business Justification *</label>
+                            <textarea id="claim-desc" class="form-control" rows="4" placeholder="Provide clear business purpose, attendees, client or project context (minimum 5 characters)..." required minlength="5"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="claim-receipt">Upload Receipt / Bill Attachment (PDF, PNG, JPG)</label>
+                            <input type="file" id="claim-receipt" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
+                            <div style="font-size: 12px; color: var(--slate-500); margin-top: 4px;">
+                                Supported formats: PDF, PNG, JPG (maximum 10MB). Attaching a verified receipt reduces predicted rejection risk.
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                            <a href="/employee-dashboard.html" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" id="btn-submit" class="btn btn-primary">Submit Claim</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!Auth.requireAuth(["EMPLOYEE"])) return;
+            document.getElementById("logout-btn")?.addEventListener("click", () => Auth.logout());
+
+            // Initialize date constraint to today
+            const today = new Date().toISOString().split("T")[0];
+            const dateInput = document.getElementById("claim-date");
+            if (dateInput) {
+                dateInput.max = today;
+                dateInput.value = today;
+            }
+
+            // Load categories from database
+            try {
+                const res = await API.get("/categories");
+                const select = document.getElementById("claim-category");
+                if (res.categories && select) {
+                    select.innerHTML = '<option value="">Select Expense Category...</option>' +
+                        res.categories.map(c => `<option value="${c.id}">${c.category_name}</option>`).join("");
+                }
+            } catch (err) {
+                console.error("Failed to load categories:", err);
+                const alertBox = document.getElementById("submit-alert");
+                if (alertBox) {
+                    alertBox.textContent = "Failed to load expense categories from server. Please refresh.";
+                    alertBox.style.display = "block";
+                }
+            }
+        });
+
+        document.getElementById("standalone-submit-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById("submit-alert");
+            const successBox = document.getElementById("submit-success");
+            const btn = document.getElementById("btn-submit");
+
+            alertBox.style.display = "none";
+            successBox.style.display = "none";
+
+            // Form element references
+            const categorySelect = document.getElementById("claim-category");
+            const amountInput = document.getElementById("claim-amount");
+            const dateInput = document.getElementById("claim-date");
+            const descInput = document.getElementById("claim-desc");
+            const fileInput = document.getElementById("claim-receipt");
+
+            // Client-side validations
+            const categoryId = parseInt(categorySelect.value, 10);
+            if (!categoryId || isNaN(categoryId)) {
+                alertBox.textContent = "Please select an expense category.";
+                alertBox.style.display = "block";
+                categorySelect.focus();
+                return;
+            }
+
+            const amount = parseFloat(amountInput.value);
+            if (isNaN(amount) || amount <= 0) {
+                alertBox.textContent = "Expense amount must be a positive number greater than 0.";
+                alertBox.style.display = "block";
+                amountInput.focus();
+                return;
+            }
+            if (amount > 1000000) {
+                alertBox.textContent = "Expense amount exceeds the permissible limit ($1,000,000).";
+                alertBox.style.display = "block";
+                amountInput.focus();
+                return;
+            }
+
+            const expenseDate = (dateInput.value || "").trim();
+            if (!expenseDate) {
+                alertBox.textContent = "Expense date is required.";
+                alertBox.style.display = "block";
+                dateInput.focus();
+                return;
+            }
+            const todayStr = new Date().toISOString().split("T")[0];
+            if (expenseDate > todayStr) {
+                alertBox.textContent = "Expense date cannot be in the future.";
+                alertBox.style.display = "block";
+                dateInput.focus();
+                return;
+            }
+
+            const description = (descInput.value || "").trim();
+            if (description.length < 5) {
+                alertBox.textContent = "Please provide a detailed expense description (minimum 5 characters).";
+                alertBox.style.display = "block";
+                descInput.focus();
+                return;
+            }
+
+            // Receipt validation if a file is attached
+            let receiptFile = null;
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                receiptFile = fileInput.files[0];
+                const allowedExtensions = ["pdf", "png", "jpg", "jpeg"];
+                const fileExt = receiptFile.name.split(".").pop().toLowerCase();
+
+                if (!allowedExtensions.includes(fileExt)) {
+                    alertBox.textContent = `Unsupported file type (${fileExt}). Allowed receipt formats: PDF, PNG, JPG, JPEG.`;
+                    alertBox.style.display = "block";
+                    fileInput.focus();
+                    return;
+                }
+
+                const maxBytes = 10 * 1024 * 1024; // 10MB
+                if (receiptFile.size > maxBytes) {
+                    alertBox.textContent = "The selected receipt exceeds the 10MB file size limit.";
+                    alertBox.style.display = "block";
+                    fileInput.focus();
+                    return;
+                }
+            }
+
+            // Prevent duplicate submissions
+            btn.disabled = true;
+            btn.textContent = "Submitting Claim...";
+
+            try {
+                const payload = {
+                    category_id: categoryId,
+                    amount: amount,
+                    expense_date: expenseDate,
+                    description: description
+                };
+
+                const res = await API.post("/reimbursements", payload);
+                if (!res.success) {
+                    throw new Error(res.error || "Failed to submit reimbursement claim.");
+                }
+
+                const newClaimId = res.claim.id;
+
+                // Upload receipt if attached
+                if (receiptFile) {
+                    btn.textContent = "Uploading Receipt...";
+                    try {
+                        await API.upload(`/reimbursements/${newClaimId}/upload`, receiptFile);
+                    } catch (uploadErr) {
+                        console.warn("Claim created but receipt upload failed:", uploadErr);
+                        alertBox.textContent = `Claim #${newClaimId} was created, but receipt upload failed: ${uploadErr.message}. You can re-upload it from claim details.`;
+                        alertBox.style.display = "block";
+                    }
+                }
+
+                successBox.innerHTML = `<strong>Success:</strong> Reimbursement claim <strong>#${newClaimId}</strong> has been submitted. Redirecting to your dashboard...`;
+                successBox.style.display = "block";
+
+                setTimeout(() => {
+                    window.location.href = `/employee-dashboard.html?submitted=${newClaimId}`;
+                }, 1000);
+            } catch (err) {
+                alertBox.textContent = err.message || "Failed to submit reimbursement claim.";
+                alertBox.style.display = "block";
+                btn.disabled = false;
+                btn.textContent = "Submit Claim";
+            }
+        });
+    </script>
+</body>
+</html>
