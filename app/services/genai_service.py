@@ -10,9 +10,17 @@ deterministic financial rule-based fallback engine.
 
 import json
 import logging
+import os
 import re
 from typing import Dict, Any, Tuple, Optional, List
 import requests
+
+try:
+    import certifi
+    os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+except ImportError:
+    pass
 
 from app.config import Config
 
@@ -146,26 +154,46 @@ Respond strictly with valid JSON with the keys:
         Never exposes the API key in logs or error traces.
         """
         api_key = Config.GEMINI_API_KEY
-        model_name = Config.GEMINI_MODEL or "gemini-1.5-flash"
+        primary_model = Config.GEMINI_MODEL or "gemini-3.7-flash"
+        candidate_models = [primary_model]
+        if primary_model != "gemini-3.5-flash":
+            candidate_models.append("gemini-3.5-flash")
 
         try:
             from google import genai
             from google.genai import types
 
-            client = genai.Client(api_key=api_key)
+            timeout_ms = int(getattr(Config, "GEMINI_TIMEOUT_SECONDS", 15) * 1000)
+            client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=timeout_ms))
             config = types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
                 temperature=0.2,
                 response_mime_type="application/json"
             )
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=config
-            )
-            if response and response.text:
-                return cls._parse_and_validate_json(response.text.strip())
-            raise RuntimeError(f"Empty response returned by Gemini model '{model_name}'.")
+
+            last_error = None
+            for model_name in candidate_models:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config
+                    )
+                    if response and response.text:
+                        parsed = cls._parse_and_validate_json(response.text.strip())
+                        parsed["active_model"] = model_name
+                        return parsed
+                except Exception as model_err:
+                    last_error = model_err
+                    err_str = str(model_err)
+                    # If invalid API key, fail fast without retrying subsequent models
+                    if "API_KEY_INVALID" in err_str or "400" in err_str:
+                        raise model_err
+                    logger.info(f"Model '{model_name}' execution attempt failed ({err_str[:60]}...).")
+
+            if last_error:
+                raise last_error
+            raise RuntimeError(f"Empty response returned by Gemini model '{primary_model}'.")
 
         except ImportError:
             # Fallback to google.generativeai only if google.genai is not installed

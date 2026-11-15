@@ -10,6 +10,13 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 
+try:
+    import certifi
+    os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+except ImportError:
+    pass
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 load_dotenv(BASE_DIR / ".env")
@@ -41,22 +48,37 @@ def run_gemini_audit_suite():
 
     try:
         from google import genai
-        client = genai.Client(api_key=api_key)
+        from google.genai import types
+        timeout_ms = int(getattr(Config, "GEMINI_TIMEOUT_SECONDS", 30) * 1000)
+        client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=timeout_ms))
         print("   Initialized google.genai Client successfully.")
         
-        # Test model call
-        response = client.models.generate_content(
-            model=configured_model,
-            contents="Respond strictly with JSON: {\"status\": \"ok\", \"service\": \"Google Gemini API\"}"
-        )
-        live_response_text = response.text.strip()
-        live_call_succeeded = True
-        print(f"   [SUCCESS] Live Gemini call succeeded! Response: {live_response_text[:100]}...")
+        # Test candidate models
+        models_to_test = [configured_model]
+        if configured_model != "gemini-3.5-flash":
+            models_to_test.append("gemini-3.5-flash")
+
+        for m_name in models_to_test:
+            try:
+                response = client.models.generate_content(
+                    model=m_name,
+                    contents="Respond strictly with JSON: {\"status\": \"ok\", \"service\": \"Google Gemini API\"}",
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
+                live_response_text = response.text.strip()
+                live_call_succeeded = True
+                print(f"   [SUCCESS] Live Gemini call succeeded on '{m_name}'! Response: {live_response_text[:100]}...")
+                break
+            except Exception as m_err:
+                err_text = GenAIService._sanitize_error(str(m_err))
+                print(f"   [NOTICE] Model '{m_name}' unavailable or rate-limited: {err_text[:80]}...")
+                last_err = m_err
+        else:
+            raise last_err
     except Exception as e:
         api_error_type = type(e).__name__
         api_error_message = GenAIService._sanitize_error(str(e))
         print(f"   [API RETURNED ERROR] {api_error_type}: {api_error_message}")
-        print("   Note: Google Gemini returned an authorization/billing policy error for this project.")
 
     # 3. Structured JSON Parsing & Schema Validation Test
     print("\n3. Testing Structured JSON Parsing & Schema Normalization...")
