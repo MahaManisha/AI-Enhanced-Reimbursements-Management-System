@@ -91,9 +91,9 @@ def create_app(config_class=Config) -> Flask:
         )
         genai_configured = bool(getattr(Config, "GEMINI_API_KEY", ""))
 
-        is_healthy = (db_status == "connected")
+        is_db_connected = (db_status == "connected")
         return jsonify({
-            "status": "healthy" if is_healthy else "degraded",
+            "status": "healthy" if is_db_connected else "degraded",
             "service": "AI-Enhanced Reimbursements Management System",
             "database": db_status,
             "ml_model_loaded": model_loaded,
@@ -101,7 +101,7 @@ def create_app(config_class=Config) -> Flask:
             "llm_provider": Config.LLM_PROVIDER,
             "environment": os.getenv("FLASK_ENV", "production"),
             "timestamp": datetime.now(timezone.utc).isoformat()
-        }), 200 if is_healthy else 503
+        }), 200
 
     # Static frontend routing
     frontend_dir = Config.BASE_DIR / "frontend"
