@@ -1,8 +1,8 @@
 services:
-  # Backend Web Service
+  # Python / Flask Web Service Backend (also serves frontend natively)
   - type: web
     name: ai-reimbursements-backend
-    env: python
+    runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
@@ -29,10 +29,4 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: FRONTEND_URL
-        sync: false
-
-  # Frontend Static Site
-  - type: static
-    name: ai-reimbursements-frontend
-    plan: free
-    staticPublishPath: ./frontend
+        value: "*"
