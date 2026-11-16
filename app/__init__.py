@@ -33,7 +33,12 @@ def create_app(config_class=Config) -> Flask:
     app.config.from_object(config_class)
 
     # Enable CORS for API routes
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if frontend_url and frontend_url != "*":
+        cors_origins = [orig.strip() for orig in frontend_url.split(",") if orig.strip()]
+    else:
+        cors_origins = "*"
+    CORS(app, resources={r"/api/*": {"origins": cors_origins}}, supports_credentials=True)
 
     # Ensure upload directory exists
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -62,6 +67,41 @@ def create_app(config_class=Config) -> Flask:
     app.register_blueprint(reimbursements_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(analytics_bp)
+
+    # Health check endpoint for deployment monitoring
+    @app.route("/api/health", methods=["GET"])
+    @app.route("/health", methods=["GET"])
+    def health_check():
+        """Production health check reporting database, ML, and GenAI readiness."""
+        from datetime import datetime, timezone
+        from app.db import get_db
+
+        db_status = "disconnected"
+        try:
+            db = get_db()
+            if db is not None:
+                db.command("ping")
+                db_status = "connected"
+        except Exception as e:
+            db_status = f"unreachable: {str(e)[:60]}"
+
+        model_loaded = (
+            PredictionService._pipeline is not None
+            and PredictionService._metadata is not None
+        )
+        genai_configured = bool(getattr(Config, "GEMINI_API_KEY", ""))
+
+        is_healthy = (db_status == "connected")
+        return jsonify({
+            "status": "healthy" if is_healthy else "degraded",
+            "service": "AI-Enhanced Reimbursements Management System",
+            "database": db_status,
+            "ml_model_loaded": model_loaded,
+            "genai_configured": genai_configured,
+            "llm_provider": Config.LLM_PROVIDER,
+            "environment": os.getenv("FLASK_ENV", "production"),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }), 200 if is_healthy else 503
 
     # Static frontend routing
     frontend_dir = Config.BASE_DIR / "frontend"

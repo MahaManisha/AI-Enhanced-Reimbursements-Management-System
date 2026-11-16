@@ -7,7 +7,18 @@
  * streaming for secure receipt viewing.
  */
 
-const API_BASE = "/api";
+/**
+ * API Base URL resolution:
+ * 1. window.__API_BASE__ if explicitly defined
+ * 2. window.__BACKEND_URL__ / window.BACKEND_API_URL + "/api"
+ * 3. Default to relative "/api" (works when served by Flask backend or via reverse proxy)
+ */
+const API_BASE = (function() {
+    if (window.__API_BASE__) return window.__API_BASE__;
+    if (window.__BACKEND_URL__) return window.__BACKEND_URL__.replace(/\/+$/, "") + "/api";
+    if (window.BACKEND_API_URL) return window.BACKEND_API_URL.replace(/\/+$/, "") + "/api";
+    return "/api";
+})();
 
 const API = {
     /**

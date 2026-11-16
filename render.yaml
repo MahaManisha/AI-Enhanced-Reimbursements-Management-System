@@ -1,0 +1,38 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: ai-reimbursements-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: MONGO_DB_NAME
+        value: reimbursement_db
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: JWT_ACCESS_TOKEN_EXPIRES_HOURS
+        value: "24"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+  # Frontend Static Site
+  - type: static
+    name: ai-reimbursements-frontend
+    plan: free
+    staticPublishPath: ./frontend
