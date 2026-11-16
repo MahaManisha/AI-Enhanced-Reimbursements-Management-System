@@ -17,6 +17,10 @@ const API_BASE = (function() {
     if (window.__API_BASE__) return window.__API_BASE__;
     if (window.__BACKEND_URL__) return window.__BACKEND_URL__.replace(/\/+$/, "") + "/api";
     if (window.BACKEND_API_URL) return window.BACKEND_API_URL.replace(/\/+$/, "") + "/api";
+    // When served from a decoupled Render Static Site (e.g. ai-reimbursements-frontend.onrender.com)
+    if (typeof window !== "undefined" && window.location.hostname.includes("onrender.com") && !window.location.hostname.includes("backend")) {
+        return "https://ai-reimbursements-backend.onrender.com/api";
+    }
     return "/api";
 })();
 
